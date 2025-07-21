@@ -16,7 +16,7 @@ export const createBook = async (req: Request, res: Response, next: NextFunction
 // Get all books
 export const getBooks = async (_req: Request, res: Response, next: NextFunction) => {
     try {
-        const books = await BookModel.find();
+        const books = await BookModel.find().sort({ _id: -1 }); // Descending order
         res.json(books);
     } catch (error: any) {
         next(new APIError(500, error.message));

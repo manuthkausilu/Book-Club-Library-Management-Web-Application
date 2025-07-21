@@ -1,5 +1,6 @@
 
 export type Reader = {
+    _id?: string; 
     name: string;
     email: string;
     phoneNumber: string;

@@ -62,6 +62,7 @@ export const completeLending = async (req: Request, res: Response, next: NextFun
 
         // Mark lending as completed
         lending.returnDate = new Date();
+        lending.status = "returned"; // <-- Set status to 'returned'
         await lending.save();
         
         res.json(lending);
@@ -74,7 +75,7 @@ export const completeLending = async (req: Request, res: Response, next: NextFun
 // Get all lending records
 export const getLendings = async (_req: Request, res: Response, next: NextFunction) => {
     try {
-        const lendings = await LendingModel.find();
+        const lendings = await LendingModel.find().sort({ _id: -1 });
         res.json(lendings);
     } catch (error: any) {
         res.status(500).json({ error: error.message });

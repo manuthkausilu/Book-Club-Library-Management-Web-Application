@@ -15,7 +15,7 @@ export const createReader = async (req: Request, res: Response, next: NextFuncti
 
 export const getReaders = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const readers = await ReaderModel.find();
+        const readers = await ReaderModel.find().sort({ _id: -1 });
         res.status(200).json(readers);
     } catch (error: any) {
         next(error);
