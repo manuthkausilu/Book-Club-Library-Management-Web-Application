@@ -1,6 +1,7 @@
 import React, { useState, type JSX } from "react"
-import { MdDashboard, MdPeople, MdInventory, MdShoppingCart } from "react-icons/md"
+import { MdDashboard, MdPeople, MdInventory, MdShoppingCart, MdWarning } from "react-icons/md"
 import { useNavigate } from "react-router-dom"
+import { useAuth } from "../context/useAuth"
 
 interface SidebarItem {
   id: string
@@ -11,10 +12,12 @@ interface SidebarItem {
 const Sidebar: React.FC = () => {
   const [activeItem, setActiveItem] = useState<string>("dashboard")
   const navigate = useNavigate()
+  const { role } = useAuth();
 
   const handleItemClick = (itemId: string) => {
     setActiveItem(itemId)
     if (itemId === "dashboard") navigate(`/dashboard`)
+    else if (itemId === "overdue") navigate(`/dashboard/overdue`)
     else navigate(`/dashboard/${itemId}`)
   }
 
@@ -24,6 +27,14 @@ const Sidebar: React.FC = () => {
       label: "Dashboard",
       icon: <MdDashboard className='w-5 h-5' />,
     },
+    // Only show Users for admin
+    ...(role === "admin"
+      ? [{
+          id: "users",
+          label: "Users",
+          icon: <MdPeople className='w-5 h-5' />,
+        }]
+      : []),
     {
       id: "readers",
       label: "Readers",
@@ -38,6 +49,11 @@ const Sidebar: React.FC = () => {
       id: "lending",
       label: "Lending",
       icon: <MdShoppingCart className='w-5 h-5' />,
+    },
+    {
+      id: "overdue",
+      label: "Overdue",
+      icon: <MdWarning className='w-5 h-5' />,
     },
   ]
 

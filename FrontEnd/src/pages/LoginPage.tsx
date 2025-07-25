@@ -1,6 +1,6 @@
 import React, { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
-import { login } from "../services/authService"
+import { login as loginService } from "../services/authService"
 import toast from "react-hot-toast"
 import axios from "axios"
 import { useAuth } from "../context/useAuth"
@@ -23,7 +23,7 @@ const Login = () => {
   const [errors, setErrors] = useState<FormErrors>({})
   const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
-  const { login: authenticate } = useAuth()
+  const { login } = useAuth()
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {}
@@ -51,9 +51,9 @@ const Login = () => {
     if (validateForm()) {
       setIsLoading(true)
       try {
-        const user = await login(formData)
-        toast.success(`Welcome, ${user.name}!`)
-        authenticate(user.accessToken)
+        const res = await loginService(formData)
+        login(res.accessToken, res.role) // <-- pass role here
+        toast.success(`Welcome, ${res.name}!`)
         navigate("/dashboard") // <-- or wherever you want to go after login
       } catch (error) {
         if (axios.isAxiosError(error)) {

@@ -19,3 +19,14 @@ export const updateBook = async (_id: string, bookData: Omit<Book, "_id">) => {
   const response = await apiClient.put(`/book/${_id}`, bookData);
   return response.data;
 };
+
+export const getBookCountWithoutCopies = async (): Promise<{ count: number }> => {
+  const response = await apiClient.get("/book/count/without-copies");
+  return response.data;
+};
+
+export const getBookCountWithCopies = async (): Promise<{ count: number }> => {
+  const response = await apiClient.get("/book/count/with-copies");
+  // The backend returns { total: number }, so map it to { count: number }
+  return { count: response.data.total ?? 0 };
+};

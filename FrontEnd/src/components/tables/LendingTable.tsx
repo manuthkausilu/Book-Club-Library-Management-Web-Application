@@ -1,5 +1,6 @@
 import React from "react";
 import type { Lending } from "../../types/Lending";
+import { MdCheckCircle, MdDelete } from "react-icons/md";
 
 interface LendingTableProps {
   lendings: Lending[];
@@ -8,7 +9,6 @@ interface LendingTableProps {
 }
 
 const LendingTable: React.FC<LendingTableProps> = ({ lendings, onComplete, onDelete }) => {
-  // No alert/confirm, just call the handlers directly
   const handleComplete = (lending: Lending) => {
     onComplete(lending);
   };
@@ -22,44 +22,50 @@ const LendingTable: React.FC<LendingTableProps> = ({ lendings, onComplete, onDel
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Book</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Reader</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Borrow Date</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Due Date</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Return Date</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+            {/* Removed Book Id and Reader Id columns */}
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Book Title</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reader Name</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Borrow Date</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Due Date</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Return Date</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
           {lendings.length === 0 ? (
             <tr>
-              <td colSpan={7} className="px-6 py-4 text-center text-gray-500">No lending records found</td>
+              <td colSpan={7} className="px-6 py-4 text-center text-gray-500">
+                No lending records found
+              </td>
             </tr>
           ) : (
             lendings.map((lending) => (
-              <tr key={lending._id}>
-                <td className="px-6 py-4">{lending.bookId}</td>
-                <td className="px-6 py-4">{lending.readerId}</td>
-                <td className="px-6 py-4">{lending.borrowDate ? new Date(lending.borrowDate).toLocaleDateString() : ""}</td>
-                <td className="px-6 py-4">{lending.dueDate ? new Date(lending.dueDate).toLocaleDateString() : ""}</td>
-                <td className="px-6 py-4">{lending.returnDate ? new Date(lending.returnDate).toLocaleDateString() : "-"}</td>
-                <td className="px-6 py-4 capitalize">{lending.status}</td>
-                <td className="px-6 py-4">
+              <tr key={lending._id} className="hover:bg-gray-50">
+                {/* Removed Book Id and Reader Id cells */}
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{lending.bookTitle}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{lending.readerName}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{lending.borrowDate ? new Date(lending.borrowDate).toLocaleDateString() : ""}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{lending.dueDate ? new Date(lending.dueDate).toLocaleDateString() : ""}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{lending.returnDate ? new Date(lending.returnDate).toLocaleDateString() : "-"}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm capitalize text-gray-900">{lending.status}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <div className="flex space-x-2">
-                    {lending.status === "borrowed" && (
+                    {["borrowed", "overdue"].includes(lending.status) && (
                       <button
                         onClick={() => handleComplete(lending)}
-                        className="px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600 transition"
+                        className="text-green-600 hover:text-green-900 p-1 rounded hover:bg-green-100 transition duration-150"
+                        title="Complete"
                       >
-                        Complete
+                        <MdCheckCircle className="w-5 h-5" />
                       </button>
                     )}
                     <button
                       onClick={() => handleDelete(lending)}
-                      className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition"
+                      className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-100 transition duration-150"
+                      title="Delete"
                     >
-                      Delete
+                      <MdDelete className="w-5 h-5" />
                     </button>
                   </div>
                 </td>

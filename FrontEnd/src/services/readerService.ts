@@ -19,3 +19,8 @@ export const updateReader = async (_id: string, readerData: Omit<Reader, "_id">)
   const response = await apiClient.put(`/reader/${_id}`, readerData);
   return response.data;
 };
+
+export const getReaderCount = async (): Promise<number> => {
+  const response = await apiClient.get("/reader/count");
+  return response.data.count;
+};

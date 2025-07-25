@@ -8,28 +8,34 @@ import {
     deleteLending,
     getLendingHistoryByBook,
     getLendingHistoryByReader,
-    getOverdueReaders,
     getOverdueBooksByReader,
-    sendOverdueNotification
+    sendOverdueNotification,
+    getOverdueLendings,
+    getOverdueCount,
+    getLendingCount
 } from "../controllers/lending.controller";
+import { authenticateToken } from './../middlewares/authenticateToken';
 
 const router = Router();
 
 // Lending CRUD
-router.post("/", createLending);
-router.patch("/complete/:id", completeLending);
-router.get("/", getLendings);
-router.get("/:id", getLendingById);
-router.put("/:id", updateLending);
-router.delete("/:id", deleteLending);
+router.post("/", authenticateToken, createLending);
+router.patch("/complete/:id", authenticateToken, completeLending);
+router.get("/", authenticateToken, getLendings);
+router.put("/:id", authenticateToken, updateLending);
+router.delete("/:id", authenticateToken, deleteLending);
+router.get("/count", authenticateToken, getLendingCount);
 
 // Lending history
-router.get("/history/book/:bookId", getLendingHistoryByBook);
-router.get("/history/reader/:readerId", getLendingHistoryByReader);
+router.get("/history/book/:bookId", authenticateToken, getLendingHistoryByBook);
+router.get("/history/reader/:readerId", authenticateToken, getLendingHistoryByReader);
 
 // Overdue management
-router.get("/overdue/readers", getOverdueReaders);
-router.get("/overdue/reader/:readerId", getOverdueBooksByReader);
-router.post("/overdue/notify", sendOverdueNotification);
+router.get("/overdue/lendings", authenticateToken, getOverdueLendings);
+router.get("/overdue/reader/:readerId", authenticateToken, getOverdueBooksByReader);
+router.post("/overdue/notify/:lendingId", authenticateToken, sendOverdueNotification);
+router.get("/overdue/count", authenticateToken, getOverdueCount);
+
+router.get("/:id", authenticateToken, getLendingById);
 
 export default router;

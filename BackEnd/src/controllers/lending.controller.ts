@@ -34,6 +34,10 @@ export const createLending = async (req: Request, res: Response, next: NextFunct
         // Set default due date to 14 days from now
         lending.dueDate = new Date();
         lending.dueDate.setDate(lending.dueDate.getDate() + 14);
+
+        lending.bookTitle = book.title;
+        lending.readerName = Reader.name;
+        
         await lending.save();
         res.status(201).json(lending);
     } catch (error: any) {
@@ -135,26 +139,21 @@ export const getLendingHistoryByReader = async (req: Request, res: Response, nex
     }
 };
 
-// Get readers with overdue books
-export const getOverdueReaders = async (_req: Request, res: Response, next: NextFunction) => {
-    try {
-        const now = new Date();
-        const overdue = await LendingModel.aggregate([
-            { $match: { dueDate: { $lt: now }, returnDate: null } },
-            { $group: { _id: "$readerId", overdueCount: { $sum: 1 } } }
-        ]);
-        res.json(overdue);
-    } catch (error: any) {
-        res.status(500).json({ error: error.message });
-    }
-};
-
-// Get overdue books for a reader
+// Get overdue by reader
 export const getOverdueBooksByReader = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const reader = await ReaderModel.findById(req.params.readerId);
         if (!reader) return res.status(404).json({ error: "Reader not found" });
         const now = new Date();
+        // Update status to "overdue" for all overdue lendings for this reader
+        await LendingModel.updateMany(
+            {
+                readerId: req.params.readerId,
+                dueDate: { $lt: now },
+                returnDate: null
+            },
+            { $set: { status: "overdue" } }
+        );
         const overdueBooks = await LendingModel.find({
             readerId: req.params.readerId,
             dueDate: { $lt: now },
@@ -166,16 +165,80 @@ export const getOverdueBooksByReader = async (req: Request, res: Response, next:
     }
 };
 
+// Send overdue notification email
 export const sendOverdueNotification = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { to, subject, text } = req.body;
-        if (!to || !subject || !text) {
-            return res.status(400).json({ error: "Missing required fields" });
+        const { lendingId } = req.params;
+        if (!lendingId) {
+            return res.status(400).json({ error: "Missing lendingId" });
         }
 
-        // Call the sendMail function from mail.service
-        const mailResponse = await sendMail.sendMail(to, subject, text);
+        // Find the lending record
+        const lending = await LendingModel.findById(lendingId);
+        if (!lending) {
+            return res.status(404).json({ error: "Lending not found" });
+        }
+
+        // Find the reader
+        const reader = await ReaderModel.findById(lending.readerId);
+        if (!reader || !reader.email) {
+            return res.status(404).json({ error: "Reader or reader email not found" });
+        }
+
+        // Compose subject and text
+        const subject = `Overdue Notice: Book "${lending.bookTitle}"`;
+        const text = `Dear ${lending.readerName},\n\n` +
+            `This is a reminder that the book "${lending.bookTitle}",\n` +
+            `you borrowed is overdue.\n` +
+            `Due Date: ${lending.dueDate ? new Date(lending.dueDate).toLocaleDateString() : "N/A"}\n\n` +
+            `Please return the book as soon as possible.\n\n` +
+            `Thank you,\nBook Club Library`;
+
+        // Send the email
+        const mailResponse = await sendMail.sendMail(reader.email, subject, text);
         res.status(200).json({ message: "Email sent successfully", response: mailResponse });
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// Get all overdue lending details
+export const getOverdueLendings = async (_req: Request, res: Response, next: NextFunction) => {
+    try {
+        const now = new Date();
+        // Update status to "overdue" for all matching lendings
+        await LendingModel.updateMany(
+            { dueDate: { $lt: now }, returnDate: null },
+            { $set: { status: "overdue" } }
+        );
+        const overdueLendings = await LendingModel.find({
+            dueDate: { $lt: now },
+            returnDate: null
+        });
+        res.json(overdueLendings);
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// get overdue count
+export const getOverdueCount = async (_req: Request, res: Response, next: NextFunction) => {
+    try {
+        const now = new Date();
+        const overdueCount = await LendingModel.countDocuments({
+            dueDate: { $lt: now },
+            returnDate: null
+        });
+        res.json({ overdueCount });
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+export const getLendingCount = async (_req: Request, res: Response, next: NextFunction) => {
+    try {
+        const count = await LendingModel.countDocuments();
+        res.json({ count });
     } catch (error: any) {
         res.status(500).json({ error: error.message });
     }

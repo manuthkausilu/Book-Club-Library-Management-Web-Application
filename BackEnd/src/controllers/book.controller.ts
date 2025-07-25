@@ -55,3 +55,30 @@ export const deleteBook = async (req: Request, res: Response, next: NextFunction
         next(new APIError(500, error.message));
     }
 };
+
+export const getBookCountWithoutCopies = async (_req: Request, res: Response, next: NextFunction) => {
+    try {
+        // Use countDocuments with an empty filter to count all books
+        const count = await BookModel.countDocuments({});
+        res.status(200).json({ count });
+    } catch (error: any) {
+        // Log the error for debugging
+        console.error("Error in getBookCount:", error);
+        res.status(500).json({ error: error.message || "Failed to get book count" });
+    }
+};
+
+// Get the total count of all available copies (sum of availableCopies for all books)
+export const getBookCountWithCopies = async (_req: Request, res: Response, next: NextFunction) => {
+    try {
+        // Aggregate sum of availableCopies for all books
+        const result = await BookModel.aggregate([
+            { $group: { _id: null, total: { $sum: "$availableCopies" } } }
+        ]);
+        const total = result.length > 0 ? result[0].total : 0;
+        res.status(200).json({ total });
+    } catch (error: any) {
+        console.error("Error in getBookCountWithCopies:", error);
+        res.status(500).json({ error: error.message || "Failed to get total available copies" });
+    }
+};

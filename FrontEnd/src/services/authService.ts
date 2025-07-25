@@ -12,6 +12,7 @@ export interface LoginResponse {
   email: string
   accessToken: string
   _id: string
+  role: string 
 }
 
 export interface LogoutResponse {
@@ -23,6 +24,11 @@ export const signUp = async (userData: User): Promise<SignUpResponse> => {
   return response.data
 }
 
+export const adminSignUp = async (userData: Omit<User, "role">): Promise<SignUpResponse> => {
+  const response = await apiClient.post("/auth/admin/signup", userData)
+  return response.data
+}
+
 export const login = async (loginData: Omit<User, "name">): Promise<LoginResponse> => {
   const response = await apiClient.post("/auth/login", loginData)
   return response.data
@@ -31,4 +37,13 @@ export const login = async (loginData: Omit<User, "name">): Promise<LoginRespons
 export const logout = async (): Promise<LogoutResponse> => {
   const response = await apiClient.post("/auth/logout")
   return response.data
+}
+
+export const getAllUsers = async (): Promise<User[]> => {
+  const response = await apiClient.get("/auth/users")
+  return response.data
+}
+
+export const deleteUser = async (userId: string): Promise<void> => {
+  await apiClient.delete(`/auth/users/${userId}`)
 }

@@ -8,7 +8,8 @@ import AdminRoutes from "./pages/AdminRoutes"
 import Readers from "./pages/ReadersPage"
 import Books from "./pages/BooksPage"
 import Lending from "./pages/LendingPage"
-
+import Overdue from "./pages/OverduePage"
+import Users from "./pages/UserPage"
 
 const router = createBrowserRouter([
   {
@@ -22,9 +23,17 @@ const router = createBrowserRouter([
         element: <AdminRoutes />,
         children: [
           { path: "/dashboard", element: <Dashboard /> },
+          {
+            path: "/dashboard/users",
+            element: (
+              // Only admin can see this page, but AdminRoutes already checks
+              <Users />
+            ),
+          },
           { path: "/dashboard/readers", element: <Readers /> },
           { path: "/dashboard/books", element: <Books /> },
           { path: "/dashboard/lending", element: <Lending /> },
+          { path: "/dashboard/overdue", element: <Overdue /> },
         ],
       },
     ],

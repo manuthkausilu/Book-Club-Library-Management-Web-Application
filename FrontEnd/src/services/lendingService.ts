@@ -40,17 +40,27 @@ export const getLendingHistoryByReader = async (readerId: string): Promise<Lendi
   return response.data;
 };
 
-export const getOverdueReaders = async () => {
-  const response = await apiClient.get("/lending/overdue/readers");
-  return response.data;
-};
-
 export const getOverdueBooksByReader = async (readerId: string) => {
   const response = await apiClient.get(`/lending/overdue/reader/${readerId}`);
   return response.data;
 };
 
-export const sendOverdueNotification = async (mailData: { to: string; subject: string; text: string }) => {
-  const response = await apiClient.post("/lending/overdue/notify", mailData);
+export const getOverdueLendings = async (): Promise<Lending[]> => {
+  const response = await apiClient.get("/lending/overdue/lendings");
+  return response.data;
+};
+
+export const getOverdueCount = async (): Promise<{ overdueCount: number }> => {
+  const response = await apiClient.get("/lending/overdue/count");
+  return response.data;
+};
+
+export const sendOverdueNotification = async (lendingId: string) => {
+  const response = await apiClient.post(`/lending/overdue/notify/${lendingId}`);
+  return response.data;
+};
+
+export const getLendingCount = async (): Promise<{ count: number }> => {
+  const response = await apiClient.get("/lending/count");
   return response.data;
 };

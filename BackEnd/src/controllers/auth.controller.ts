@@ -43,7 +43,7 @@ export const Adminsignup = async (req: Request, res: Response, next: NextFunctio
     const user = new UserModel({
       email,
       name,
-      role: "admin", // default role
+      role: "admin", // always sets admin role
       password: hashedPassword,
     })
     await user.save()
@@ -63,6 +63,19 @@ export const getAllUsers = async (_req: Request, res: Response, next: NextFuncti
   try {
     const users = await UserModel.find().select("-password") // exclude password
     res.status(200).json(users)
+  } catch (err) {
+    next(err)
+  }
+}
+
+export const deleteUser = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.params.id
+    const user = await UserModel.findByIdAndDelete(userId)
+    if (!user) {
+      throw new APIError(404, "User not found")
+    }
+    res.status(204).send()
   } catch (err) {
     next(err)
   }

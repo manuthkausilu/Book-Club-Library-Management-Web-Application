@@ -60,3 +60,12 @@ export const deleteReader = async (req: Request, res: Response, next: NextFuncti
         next(error);
     }
 }
+
+export const getReaderCount = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const count = await ReaderModel.countDocuments();
+        res.status(200).json({ count });
+    } catch (error: any) {
+        next(error);
+    }
+}
