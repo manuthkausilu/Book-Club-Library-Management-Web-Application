@@ -18,8 +18,8 @@ const LendingTable: React.FC<LendingTableProps> = ({ lendings, onComplete, onDel
   };
 
   return (
-    <div className="bg-white shadow-md rounded-lg overflow-hidden">
-      <table className="min-w-full divide-y divide-gray-200">
+    <div className="bg-white shadow-md rounded-lg overflow-x-auto">
+      <table className="min-w-full divide-y divide-gray-200 text-xs sm:text-sm">
         <thead className="bg-gray-50">
           <tr>
             {/* Removed Book Id and Reader Id columns */}

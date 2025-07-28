@@ -5,6 +5,7 @@ import Dialog from "../components/Dialog";
 import type { Lending } from "../types/Lending";
 import type { Book } from "../types/Book";
 import type { Reader } from "../types/Reader";
+import { MdAdd } from "react-icons/md";
 import {
   getAllLendings,
   addLending,
@@ -77,8 +78,10 @@ const LendingPage: React.FC = () => {
         toast.success("Lending deleted");
       }
       fetchAll();
-    } catch (error) {
-      toast.error("Action failed");
+    } catch (error: any) {
+      // Show API error message if available
+      const apiMsg = error?.response?.data?.error || error?.message || "Action failed";
+      toast.error(apiMsg);
     } finally {
       setConfirmDialog({ open: false, type: null, lending: null });
     }
@@ -89,14 +92,15 @@ const LendingPage: React.FC = () => {
   };
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
-      <div className="max-w-7xl mx-auto">
+    <div className="p-2 sm:p-4 md:p-6 bg-gray-100 min-h-screen">
+      <div className="max-w-full md:max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold text-gray-800">Lending Management</h1>
           <button
             onClick={handleAddLending}
             className="flex items-center space-x-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition duration-150"
           >
+            <MdAdd className="w-5 h-5" />
             <span>Add Lending</span>
           </button>
         </div>

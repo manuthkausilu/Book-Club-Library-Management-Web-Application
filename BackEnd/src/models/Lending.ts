@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 const lendingSchema = new mongoose.Schema({
-    bookId: { type: mongoose.Schema.Types.ObjectId, ref: 'Book', required: true }, // <-- single book
+    bookId: { type: mongoose.Schema.Types.ObjectId, ref: 'Book', required: true }, // single book
     bookTitle: { type: String, required: true },
     readerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Reader', required: true },
     readerName: { type: String, required: true },

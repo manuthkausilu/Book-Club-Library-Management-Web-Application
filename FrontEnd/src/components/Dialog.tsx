@@ -13,7 +13,7 @@ const Dialog = ({ isOpen, onCancel, onConfirm, children, title }: DialogProps) =
 
   return (
     <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
-      <div className='bg-white rounded-lg shadow-lg p-6 w-full max-w-2xl max-h-[90vh] flex flex-col'>
+      <div className='bg-white rounded-lg shadow-lg p-4 sm:p-6 w-full max-w-xs sm:max-w-lg md:max-w-2xl max-h-[90vh] flex flex-col'>
         {title && (
           <div className='mb-4 flex-shrink-0'>
             <h2 className='text-xl font-semibold text-gray-800'>{title}</h2>

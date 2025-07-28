@@ -62,7 +62,7 @@ const UserPage: React.FC = () => {
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="p-2 sm:p-4 md:p-6 max-w-full md:max-w-4xl mx-auto">
       <h1 className="text-2xl font-bold mb-6">User Management</h1>
       <div className="mb-8">
         <h2 className="text-lg font-semibold mb-2">Create Admin</h2>

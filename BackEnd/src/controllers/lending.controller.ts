@@ -12,10 +12,10 @@ export const createLending = async (req: Request, res: Response, next: NextFunct
         // Check book availability
         const book = await BookModel.findById(bookId);
         if (!book) {
-            return res.status(404).json({ error: "Book not found" });
+            return next(new APIError(404, "Book not found"));
         }
         if (book.availableCopies < 1) {
-            return res.status(400).json({ error: "No available copies for this book" });
+            return next(new APIError(400, "No available copies for this book"));
         }
         // Decrement availableCopies
         book.availableCopies -= 1;
@@ -25,7 +25,7 @@ export const createLending = async (req: Request, res: Response, next: NextFunct
         const { readerId } = req.body;
         const Reader = await ReaderModel.findById(readerId);
         if (!Reader) {
-            return res.status(404).json({ error: "Reader not found" });
+            return next(new APIError(404, "Reader not found"));
         }
 
         // Create lending record
@@ -41,7 +41,7 @@ export const createLending = async (req: Request, res: Response, next: NextFunct
         await lending.save();
         res.status(201).json(lending);
     } catch (error: any) {
-        res.status(400).json({ error: error.message });
+        next(new APIError(400, error.message));
     }
 };
 
@@ -51,10 +51,10 @@ export const completeLending = async (req: Request, res: Response, next: NextFun
     try {   
         const lending = await LendingModel.findById(req.params.id);
 
-        if (!lending) return res.status(404).json({ error: "Lending not found" });
+        if (!lending) return next(new APIError(404, "Lending not found"));
 
         if (lending.returnDate) {
-            return res.status(400).json({ error: "Lending already completed" });
+            return next(new APIError(400, "Lending already completed"));
         }
 
         // Increment availableCopies of the book
@@ -66,13 +66,13 @@ export const completeLending = async (req: Request, res: Response, next: NextFun
 
         // Mark lending as completed
         lending.returnDate = new Date();
-        lending.status = "returned"; // <-- Set status to 'returned'
+        lending.status = "returned"; //Set status to returned
         await lending.save();
         
         res.json(lending);
 
     } catch (error: any) {
-        res.status(400).json({ error: error.message });
+        next(new APIError(400, error.message));
     }
 };
 
@@ -82,7 +82,7 @@ export const getLendings = async (_req: Request, res: Response, next: NextFuncti
         const lendings = await LendingModel.find().sort({ _id: -1 });
         res.json(lendings);
     } catch (error: any) {
-        res.status(500).json({ error: error.message });
+        next(new APIError(500, error.message));
     }
 };
 
@@ -90,10 +90,10 @@ export const getLendings = async (_req: Request, res: Response, next: NextFuncti
 export const getLendingById = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const lending = await LendingModel.findById(req.params.id);
-        if (!lending) return res.status(404).json({ error: "Lending not found" });
+        if (!lending) return next(new APIError(404, "Lending not found"));
         res.json(lending);
     } catch (error: any) {
-        res.status(500).json({ error: error.message });
+        next(new APIError(500, error.message));
     }
 };
 
@@ -101,21 +101,25 @@ export const getLendingById = async (req: Request, res: Response, next: NextFunc
 export const updateLending = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const lending = await LendingModel.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        if (!lending) return res.status(404).json({ error: "Lending not found" });
+        if (!lending) return next(new APIError(404, "Lending not found"));
         res.json(lending);
     } catch (error: any) {
-        res.status(400).json({ error: error.message });
+        next(new APIError(400, error.message));
     }
 };
 
 // Delete a lending record by ID
 export const deleteLending = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const lending = await LendingModel.findByIdAndDelete(req.params.id);
-        if (!lending) return res.status(404).json({ error: "Lending not found" });
+        const lending = await LendingModel.findById(req.params.id);
+        if (!lending) return next(new APIError(404, "Lending not found"));
+        if (lending.status !== "returned") {
+            return next(new APIError(400, "Only lendings with status 'returned' can be deleted"));
+        }
+        await LendingModel.findByIdAndDelete(req.params.id);
         res.json({ message: "Lending deleted successfully" });
     } catch (error: any) {
-        res.status(500).json({ error: error.message });
+        next(new APIError(500, error.message));
     }
 };
 
@@ -125,7 +129,7 @@ export const getLendingHistoryByBook = async (req: Request, res: Response, next:
         const lendings = await LendingModel.find({ bookId: req.params.bookId });
         res.json(lendings);
     } catch (error: any) {
-        res.status(500).json({ error: error.message });
+        next(new APIError(500, error.message));
     }
 };
 
@@ -135,7 +139,7 @@ export const getLendingHistoryByReader = async (req: Request, res: Response, nex
         const lendings = await LendingModel.find({ readerId: req.params.readerId });
         res.json(lendings);
     } catch (error: any) {
-        res.status(500).json({ error: error.message });
+        next(new APIError(500, error.message));
     }
 };
 
@@ -143,7 +147,7 @@ export const getLendingHistoryByReader = async (req: Request, res: Response, nex
 export const getOverdueBooksByReader = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const reader = await ReaderModel.findById(req.params.readerId);
-        if (!reader) return res.status(404).json({ error: "Reader not found" });
+        if (!reader) return next(new APIError(404, "Reader not found"));
         const now = new Date();
         // Update status to "overdue" for all overdue lendings for this reader
         await LendingModel.updateMany(
@@ -161,7 +165,7 @@ export const getOverdueBooksByReader = async (req: Request, res: Response, next:
         });
         res.json(overdueBooks);
     } catch (error: any) {
-        res.status(500).json({ error: error.message });
+        next(new APIError(500, error.message));
     }
 };
 
@@ -170,19 +174,19 @@ export const sendOverdueNotification = async (req: Request, res: Response, next:
     try {
         const { lendingId } = req.params;
         if (!lendingId) {
-            return res.status(400).json({ error: "Missing lendingId" });
+            return next(new APIError(400, "Missing lendingId"));
         }
 
         // Find the lending record
         const lending = await LendingModel.findById(lendingId);
         if (!lending) {
-            return res.status(404).json({ error: "Lending not found" });
+            return next(new APIError(404, "Lending not found"));
         }
 
         // Find the reader
         const reader = await ReaderModel.findById(lending.readerId);
         if (!reader || !reader.email) {
-            return res.status(404).json({ error: "Reader or reader email not found" });
+            return next(new APIError(404, "Reader or reader email not found"));
         }
 
         // Compose subject and text
@@ -198,7 +202,7 @@ export const sendOverdueNotification = async (req: Request, res: Response, next:
         const mailResponse = await sendMail.sendMail(reader.email, subject, text);
         res.status(200).json({ message: "Email sent successfully", response: mailResponse });
     } catch (error: any) {
-        res.status(500).json({ error: error.message });
+        next(new APIError(500, error.message));
     }
 };
 
@@ -217,7 +221,7 @@ export const getOverdueLendings = async (_req: Request, res: Response, next: Nex
         });
         res.json(overdueLendings);
     } catch (error: any) {
-        res.status(500).json({ error: error.message });
+        next(new APIError(500, error.message));
     }
 };
 
@@ -231,7 +235,7 @@ export const getOverdueCount = async (_req: Request, res: Response, next: NextFu
         });
         res.json({ overdueCount });
     } catch (error: any) {
-        res.status(500).json({ error: error.message });
+        next(new APIError(500, error.message));
     }
 };
 
@@ -240,7 +244,7 @@ export const getLendingCount = async (_req: Request, res: Response, next: NextFu
         const count = await LendingModel.countDocuments();
         res.json({ count });
     } catch (error: any) {
-        res.status(500).json({ error: error.message });
+        next(new APIError(500, error.message));
     }
 };
 
