@@ -7,6 +7,7 @@ const authRouter = Router()
 
 authRouter.post("/signup", signup) // POST /api/auth/signup
 authRouter.post("/admin/signup",  authenticateToken, authorizeRole("admin"), Adminsignup) // POST /api/auth/admin/signup
+//admin@gmail.com   //123456
 authRouter.post("/login", login)
 authRouter.get("/users", authenticateToken, authorizeRole("admin"), getAllUsers) // GET /api/auth/users
 authRouter.post("/refresh-token", refreshToken)
