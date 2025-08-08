@@ -10,7 +10,7 @@ dotenv.config()
 const app = express()
 
 app.use(cors({
-  origin: 'http://localhost:5173', // allow your frontend origin
+  origin: ['http://localhost:5173', 'https://book-club-library-managemen-git-344ad4-manuth-kausilus-projects.vercel.app'], // allow your frontend origin
   credentials: true // if you need to send cookies/auth headers
 }));
 
